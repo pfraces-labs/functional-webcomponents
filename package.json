@@ -1,0 +1,12 @@
+{
+  "name": "functional-webcomponents",
+  "version": "0.1.0",
+  "description": "Functional WebComponents",
+  "scripts": {
+    "start": "serve src/"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "serve": "^12.0.1"
+  }
+}
