@@ -1,0 +1,28 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Functional Web Components</title>
+    <script type="module" src="register.js"></script>
+  </head>
+
+  <body>
+    <div id="container">
+      <input-number value="0"></input-number>
+    </div>
+
+    <script>
+      const container = document.getElementById('container');
+
+      container.addEventListener('increment', (event) => {
+        console.log({ event: 'increment', payload: event });
+      });
+
+      container.addEventListener('decrement', (event) => {
+        console.log({ event: 'decrement', payload: event });
+      });
+    </script>
+  </body>
+</html>

@@ -5,16 +5,24 @@
 - [x] Format Markdown with Prettier: 80-characters print width
 - [x] Live reload
 - [x] Standalone examples
+- [ ] ESLint: Unused and undeclared variables
+
+## Getting Started
+
+- [x] DOM API
+- [x] Shadow DOM
+- [x] Constructors & Prototypes
+- [x] Class expressions
+- [x] Render function (`render(state) => dom`)
 
 ## Features
 
-- [x] Render function (`render(state) => dom`)
-- [x] Read attributes
-- [x] HyperScript-like syntax
+- [x] Attributes
+- [x] HyperScript
 - [x] Event listeners
-- [ ] Dispatch custom events
-- [ ] Event delegation
-- [ ] Receive complex data (element props)
+- [x] Custom events
+- [ ] Display block (`:host { display: block; }`)
+- [ ] Complex data (element props)
 - [ ] Children rendering (slots?)
 - [ ] Lifecycle hooks (`onMount() => onUnmount`)
 - [ ] Conditional rendering
@@ -24,7 +32,7 @@
 
 ## Research
 
-- [ ] Benefits and drawbacks of using Shadow DOM
+- [x] Benefits and drawbacks of using Shadow DOM
 - [ ] Component contents: `constructor` vs `connectedCallback`
   - <https://stackoverflow.com/questions/63066330/create-webcomponent-through-createelement>
 - [ ] Benefits and drawbacks of using `<template>` clones

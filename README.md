@@ -355,6 +355,96 @@ export const ClickMe = customElement(({ title }) => [
 ]);
 ```
 
+### Custom Events
+
+JSX-based frameworks tend to pass callbacks through props from parent to child
+to accomplish child to parent communication.
+
+In contrast, with native DOM APIs, we add event listeners via `addEventListener`
+to accomplish the same. This is a more intuitive abstraction if we consider
+component events as its outputs.
+
+We are going to provide a `dispatch` function through the component props which
+will dispatch custom events.
+
+[src/features/custom-events/custom-element.js](src/features/custom-events/custom-element.js)
+
+```js
+const customEventDispatcher = (element) => {
+  return (eventName, detail) => {
+    element.dispatchEvent(
+      new CustomEvent(eventName, {
+        bubbles: true,
+        detail,
+      }),
+    );
+  };
+};
+
+export const customElement = (render) => {
+  return class extends HTMLElement {
+    constructor() {
+      super();
+      const shadowRoot = this.attachShadow({ mode: 'open' });
+
+      const children = render({
+        dispatch: customEventDispatcher(this),
+        ...attrsMap(this.attributes),
+      });
+
+      [].concat(children).forEach((child) => {
+        shadowRoot.appendChild(child);
+      });
+    }
+  };
+};
+```
+
+[src/features/custom-events/input-number.js](src/features/custom-events/input-number.js)
+
+```js
+import { customElement } from './custom-element.js';
+import { h1, span, button } from './hyperscript.js';
+
+export const InputNumber = customElement(({ value, dispatch }) => [
+  h1('Input Number'),
+  span(`Value: ${value} `),
+  button('+').on('click', () => {
+    dispatch('increment');
+  }),
+  button('-').on('click', () => {
+    dispatch('decrement');
+  }),
+]);
+```
+
+To match the default DOM events behavior, dispatched custom events will bubble
+up through the parent nodes so we can listen to the component events from any of
+its parents. This behavior also allows for implementing
+[event delegation](https://davidwalsh.name/event-delegate).
+
+[src/features/custom-events/index.html](src/features/custom-events/index.html)
+
+```html
+<body>
+  <div id="container">
+    <input-number value="0"></input-number>
+  </div>
+
+  <script>
+    const container = document.getElementById('container');
+
+    container.addEventListener('increment', (event) => {
+      console.log({ event: 'increment', payload: event });
+    });
+
+    container.addEventListener('decrement', (event) => {
+      console.log({ event: 'decrement', payload: event });
+    });
+  </script>
+</body>
+```
+
 ## References
 
 - <https://developer.mozilla.org/en-US/docs/Web/Web_Components>
