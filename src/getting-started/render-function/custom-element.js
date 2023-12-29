@@ -2,7 +2,8 @@ export const customElement = (render) => {
   return class extends HTMLElement {
     constructor() {
       super();
-      this.innerHTML = render();
+      const shadowRoot = this.attachShadow({ mode: 'open' });
+      shadowRoot.innerHTML = render();
     }
   };
 };

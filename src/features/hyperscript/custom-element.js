@@ -1,7 +1,7 @@
 const attrsMap = (attributes) => {
   return [...attributes].reduce(
     (acc, attribute) => ({ ...acc, [attribute.name]: attribute.value }),
-    {}
+    {},
   );
 };
 
@@ -9,10 +9,11 @@ export const customElement = (render) => {
   return class extends HTMLElement {
     constructor() {
       super();
-      const children = [].concat(render(attrsMap(this.attributes)));
+      const shadowRoot = this.attachShadow({ mode: 'open' });
+      const children = render(attrsMap(this.attributes));
 
-      children.forEach((child) => {
-        this.appendChild(child);
+      [].concat(children).forEach((child) => {
+        shadowRoot.appendChild(child);
       });
     }
   };

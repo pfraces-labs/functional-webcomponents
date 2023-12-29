@@ -64,30 +64,6 @@ export class HelloWorld extends HTMLElement {
 }
 ```
 
-### Shadow DOM
-
-[Using shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM)
-
-> An important aspect of custom elements is encapsulation, because a custom
-> element, by definition, is a piece of reusable functionality: it might be
-> dropped into any web page and be expected to work. So it's important that code
-> running in the page should not be able to accidentally break a custom element
-> by modifying its internal implementation. Shadow DOM enables you to attach a
-> DOM tree to an element, and have the internals of this tree hidden from
-> JavaScript and CSS running in the page.
-
-[src/getting-started/shadow-dom/hello-world.js](src/getting-started/shadow-dom/hello-world.js)
-
-```js
-export class HelloWorld extends HTMLElement {
-  constructor() {
-    super();
-    const shadowRoot = this.attachShadow({ mode: 'open' });
-    shadowRoot.innerHTML = '<h1>Hello, World!</h1>';
-  }
-}
-```
-
 ### Constructors & Prototypes
 
 [What is the ES5 way of writing web component classes?](https://stackoverflow.com/questions/45747646/what-is-the-es5-way-of-writing-web-component-classes)
@@ -152,6 +128,30 @@ export const HelloWorld = class extends HTMLElement {
 };
 ```
 
+### Shadow DOM
+
+[Using shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM)
+
+> An important aspect of custom elements is encapsulation, because a custom
+> element, by definition, is a piece of reusable functionality: it might be
+> dropped into any web page and be expected to work. So it's important that code
+> running in the page should not be able to accidentally break a custom element
+> by modifying its internal implementation. Shadow DOM enables you to attach a
+> DOM tree to an element, and have the internals of this tree hidden from
+> JavaScript and CSS running in the page.
+
+[src/getting-started/shadow-dom/hello-world.js](src/getting-started/shadow-dom/hello-world.js)
+
+```js
+export class HelloWorld extends HTMLElement {
+  constructor() {
+    super();
+    const shadowRoot = this.attachShadow({ mode: 'open' });
+    shadowRoot.innerHTML = '<h1>Hello, World!</h1>';
+  }
+}
+```
+
 ### Render function
 
 Once we have the basics to build custom elements without using the `class`
@@ -167,7 +167,8 @@ export const customElement = (render) => {
   return class extends HTMLElement {
     constructor() {
       super();
-      this.innerHTML = render();
+      const shadowRoot = this.attachShadow({ mode: 'open' });
+      shadowRoot.innerHTML = render();
     }
   };
 };
@@ -209,7 +210,8 @@ export const customElement = (render) => {
   return class extends HTMLElement {
     constructor() {
       super();
-      this.innerHTML = render(attrsMap(this.attributes));
+      const shadowRoot = this.attachShadow({ mode: 'open' });
+      shadowRoot.innerHTML = render(attrsMap(this.attributes));
     }
   };
 };
@@ -289,10 +291,11 @@ export const customElement = (render) => {
   return class extends HTMLElement {
     constructor() {
       super();
-      const children = [].concat(render(attrsMap(this.attributes)));
+      const shadowRoot = this.attachShadow({ mode: 'open' });
+      const children = render(attrsMap(this.attributes));
 
-      children.forEach((child) => {
-        this.appendChild(child);
+      [].concat(children).forEach((child) => {
+        shadowRoot.appendChild(child);
       });
     }
   };
