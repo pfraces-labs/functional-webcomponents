@@ -27,7 +27,7 @@ Result:
 
 ## Introduction
 
-<https://dev.to/hybrids/from-classes-to-plain-objects-and-pure-functions-2gip>
+[From classes to plain objects and pure functions](https://dev.to/hybrids/from-classes-to-plain-objects-and-pure-functions-2gip)
 
 > The only way to create a custom element is to use a class, which extends
 > `HTMLElement` and then define it with Custom Elements API.
@@ -53,11 +53,12 @@ const GreetMe = customElement(({ name = 'World' }) => h1(`Hello, ${name}!`));
 
 Let's see how to create a simple web component with the default class syntax.
 
-`src/getting-started/dom-api/hello-world.js`
+[src/getting-started/dom-api/hello-world.js](src/getting-started/dom-api/hello-world.js)
 
 ```js
 export class HelloWorld extends HTMLElement {
-  connectedCallback() {
+  constructor() {
+    super();
     this.innerHTML = '<h1>Hello, World!</h1>';
   }
 }
@@ -65,7 +66,17 @@ export class HelloWorld extends HTMLElement {
 
 ### Shadow DOM
 
-`src/getting-started/shadow-dom/hello-world.js`
+[Using shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM)
+
+> An important aspect of custom elements is encapsulation, because a custom
+> element, by definition, is a piece of reusable functionality: it might be
+> dropped into any web page and be expected to work. So it's important that code
+> running in the page should not be able to accidentally break a custom element
+> by modifying its internal implementation. Shadow DOM enables you to attach a
+> DOM tree to an element, and have the internals of this tree hidden from
+> JavaScript and CSS running in the page.
+
+[src/getting-started/shadow-dom/hello-world.js](src/getting-started/shadow-dom/hello-world.js)
 
 ```js
 export class HelloWorld extends HTMLElement {
@@ -79,7 +90,7 @@ export class HelloWorld extends HTMLElement {
 
 ### Constructors & Prototypes
 
-<https://stackoverflow.com/questions/45747646/what-is-the-es5-way-of-writing-web-component-classes>
+[What is the ES5 way of writing web component classes?](https://stackoverflow.com/questions/45747646/what-is-the-es5-way-of-writing-web-component-classes)
 
 > To simulate the default ES6 constructor that calls `super()`, we can use
 > `Reflect.construct` to invoke the `HTMLElement` constructor but using the
@@ -90,39 +101,52 @@ export class HelloWorld extends HTMLElement {
 > It's conventional to use use `Object.create()` to create a non-functional
 > dummy instance without invoking the constructor here.
 
-<https://github.com/WICG/webcomponents/issues/423>
+[ES5 consideration for custom elements](https://github.com/WICG/webcomponents/issues/423#issuecomment-199628425)
 
 > `HTMLElement.call(this)` would not work but `Reflect.construct` would.
 >
 > All browsers that support custom elements v1 API would support
 > `Reflect.construct`.
 
-`src/getting-started/constructors-and-prototypes/hello-world.js`
+[Non-class based example of customElement.define()](https://github.com/WICG/webcomponents/issues/587#issuecomment-378684197)
+
+```js
+function MyEl() {
+  return Reflect.construct(HTMLElement, [], this.constructor);
+}
+
+MyEl.prototype = Object.create(HTMLElement.prototype);
+MyEl.prototype.constructor = MyEl;
+Object.setPrototypeOf(MyEl, HTMLElement);
+```
+
+[src/getting-started/constructors-and-prototypes/hello-world.js](src/getting-started/constructors-and-prototypes/hello-world.js)
 
 ```js
 export function HelloWorld() {
-  return Reflect.construct(HTMLElement, [], HelloWorld);
+  const self = Reflect.construct(HTMLElement, [], this.constructor);
+  self.innerHTML = '<h1>Hello, World!</h1>';
+  return self;
 }
 
 HelloWorld.prototype = Object.create(HTMLElement.prototype);
-
-HelloWorld.prototype.connectedCallback = function () {
-  this.innerHTML = '<h1>Hello, World!</h1>';
-};
+HelloWorld.prototype.constructor = HelloWorld;
+Object.setPrototypeOf(HelloWorld, HTMLElement);
 ```
 
 ### Class expressions
 
-<https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/class>
+[Class expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/class)
 
 Class expressions allows us to create classes dynamically reducing the
 complexity of the "constructor & prototype" approach.
 
-`src/getting-started/class-expressions/hello-world.js`
+[src/getting-started/class-expressions/hello-world.js](src/getting-started/class-expressions/hello-world.js)
 
 ```js
 export const HelloWorld = class extends HTMLElement {
-  connectedCallback() {
+  constructor() {
+    super();
     this.innerHTML = '<h1>Hello, World!</h1>';
   }
 };
@@ -136,7 +160,7 @@ keyword we can create an abstraction to build them in a functional style.
 The initial step is to provide an API to declare presentational Web Components
 emulating the React functional components API.
 
-`src/getting-started/render-function/custom-element.js`
+[src/getting-started/render-function/custom-element.js](src/getting-started/render-function/custom-element.js)
 
 ```js
 export const customElement = (render) => {
@@ -149,7 +173,7 @@ export const customElement = (render) => {
 };
 ```
 
-`src/getting-started/render-function/hello-world.js`
+[src/getting-started/render-function/hello-world.js](src/getting-started/render-function/hello-world.js)
 
 ```js
 import { customElement } from './custom-element.js';
@@ -171,7 +195,7 @@ We can reflect attribute values by iterating `this.attributes` from the
 <greet-me name="World"></greet-me>
 ```
 
-`src/features/attributes/custom-element.js`
+[src/features/attributes/custom-element.js](src/features/attributes/custom-element.js)
 
 ```js
 const attrsMap = (attributes) => {
@@ -191,7 +215,7 @@ export const customElement = (render) => {
 };
 ```
 
-`src/features/attributes/greet-me.js`
+[src/features/attributes/greet-me.js](src/features/attributes/greet-me.js)
 
 ```js
 import { customElement } from './custom-element.js';
@@ -210,7 +234,7 @@ from JavaScript use one of the following approaches to declare the markup:
 
 Let's implement our own HyperScript-like syntax.
 
-`src/features/hyperscript/hyperscript.js`
+[src/features/hyperscript/hyperscript.js](src/features/hyperscript/hyperscript.js)
 
 ```js
 const isString = (value) => typeof value === 'string';
@@ -231,7 +255,7 @@ export const createElement = ({ tagName, props = {}, children = [] }) => {
 With the `createElement` function and a little bit of JavaScript magic, we can
 create a clean API for building DOM elements.
 
-`src/features/hyperscript/hyperscript.js`
+[src/features/hyperscript/hyperscript.js](src/features/hyperscript/hyperscript.js)
 
 ```js
 export const div = createElementPartial('div');
@@ -242,7 +266,7 @@ export const p = createElementPartial('p');
 We can declare as many element creators as we need, then we will use them to
 build the component markup.
 
-`src/features/hyperscript/greet-me.js`
+[src/features/hyperscript/greet-me.js](src/features/hyperscript/greet-me.js)
 
 ```js
 import { customElement } from './custom-element.js';
@@ -258,7 +282,7 @@ export const GreetMe = customElement(({ name }) => [
 The `customElement` function has been updated to receive either a DOM tree or an
 array of DOM trees.
 
-`src/features/hyperscript/custom-element.js`
+[src/features/hyperscript/custom-element.js](src/features/hyperscript/custom-element.js)
 
 ```js
 export const customElement = (render) => {
@@ -286,7 +310,7 @@ will be bound to the host element no matter where it is called from.
 Also, the `on` method will support chaining, meaning each invocation will return
 the host element.
 
-`src/features/event-listeners/hyperscript.js`
+[src/features/event-listeners/hyperscript.js](src/features/event-listeners/hyperscript.js)
 
 ```js
 export const createElement = ({ tagName, props = {}, children = [] }) => {
@@ -307,7 +331,7 @@ export const createElement = ({ tagName, props = {}, children = [] }) => {
 };
 ```
 
-`src/features/event-listeners/click-me.js`
+[src/features/event-listeners/click-me.js](src/features/event-listeners/click-me.js)
 
 ```js
 import { customElement } from './custom-element.js';
@@ -331,6 +355,3 @@ export const ClickMe = customElement(({ title }) => [
 ## References
 
 - <https://developer.mozilla.org/en-US/docs/Web/Web_Components>
-- <https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements>
-- <https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM>
-- <https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_templates_and_slots>

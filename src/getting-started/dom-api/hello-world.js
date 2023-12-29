@@ -1,5 +1,6 @@
 export class HelloWorld extends HTMLElement {
-  connectedCallback() {
+  constructor() {
+    super();
     this.innerHTML = '<h1>Hello, World!</h1>';
   }
 }
