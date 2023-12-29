@@ -1,5 +1,5 @@
 import { customElement } from './custom-element.js';
-import { h1, p } from './create-element.js';
+import { h1, p } from './hyperscript.js';
 
 export const Greeting = customElement(({ name }) => [
   h1(`Hello, ${name}!`),

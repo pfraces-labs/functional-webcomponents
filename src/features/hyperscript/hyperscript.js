@@ -32,7 +32,7 @@ const createElementConfig = (tagName, ...options) => {
 
       return acc;
     },
-    { tagName }
+    { tagName },
   );
 };
 
@@ -42,7 +42,5 @@ export const createElementPartial = (tagName) => {
   };
 };
 
-export const template = createElementPartial('template');
-export const div = createElementPartial('div');
 export const h1 = createElementPartial('h1');
 export const p = createElementPartial('p');

@@ -42,8 +42,8 @@ class Greeting extends HTMLElement {
 }
 ```
 
-In contrast, the proposed `customElement` syntax is more declarative improving
-its readability.
+In contrast, the proposed `customElement` syntax is much more succinct and
+declarative, improving its readability.
 
 ```js
 const Greeting = customElement(({ name = 'World' }) => h1(`Hello, ${name}!`));
@@ -100,9 +100,9 @@ export class HelloWorld extends HTMLElement {
 `src/getting-started/constructors-and-prototypes/hello-world.js`
 
 ```js
-export const HelloWorld = function () {
+export function HelloWorld() {
   return Reflect.construct(HTMLElement, [], HelloWorld);
-};
+}
 
 HelloWorld.prototype = Object.create(HTMLElement.prototype);
 
@@ -199,7 +199,7 @@ import { customElement } from './custom-element-attrs.js';
 export const Greeting = customElement(({ name }) => `<h1>Hello, ${name}!</h1>`);
 ```
 
-### Create Element
+### HyperScript
 
 Current frontend frameworks using a render function to define component contents
 from JavaScript use one of the following approaches to declare the markup:
@@ -210,7 +210,7 @@ from JavaScript use one of the following approaches to declare the markup:
 
 Let's implement our own HyperScript-like syntax.
 
-`src/features/create-element/create-element.js`
+`src/features/hyperscript/hyperscript.js`
 
 ```js
 const isString = (value) => typeof value === 'string';
@@ -231,7 +231,7 @@ export const createElement = ({ tagName, props = {}, children = [] }) => {
 With the `createElement` function and a little bit of JavaScript magic, we can
 create a clean API for building DOM elements.
 
-`src/features/create-element/create-element.js`
+`src/features/hyperscript/hyperscript.js`
 
 ```js
 export const div = createElementPartial('div');
@@ -242,7 +242,7 @@ export const p = createElementPartial('p');
 We can declare as many element creators as we need, then we will use them to
 build the component markup.
 
-`src/features/create-element/greeting.js`
+`src/features/hyperscript/greeting.js`
 
 ```js
 import { customElement } from './custom-element.js';
@@ -258,7 +258,7 @@ export const Greeting = customElement(({ name }) => [
 The `customElement` function has been updated to receive either a DOM tree or an
 array of DOM trees.
 
-`src/features/create-element/custom-element.js`
+`src/features/hyperscript/custom-element.js`
 
 ```js
 export const customElement = (render) => {
@@ -273,6 +273,59 @@ export const customElement = (render) => {
     }
   };
 };
+```
+
+### Event Listeners
+
+Let's add an `on` method to our HyperScript-created elements so we can attach
+event listeners with ease.
+
+The `on` method will be a context-free wrapper of `addEventListener`, meaning it
+will be bound to the host element no matter where it is called from.
+
+Also, the `on` method will support chaining, meaning each invocation will return
+the host element.
+
+`src/features/event-listeners/hyperscript.js`
+
+```js
+export const createElement = ({ tagName, props = {}, children = [] }) => {
+  const element = document.createElement(tagName);
+
+  element.on = (...args) => {
+    element.addEventListener(...args);
+    return element;
+  };
+
+  Object.assign(element, props);
+
+  children.forEach((child) => {
+    element.appendChild(isString(child) ? createTextNode(child) : child);
+  });
+
+  return element;
+};
+```
+
+`src/features/event-listeners/click-me.js`
+
+```js
+import { customElement } from './custom-element.js';
+import { h1, p, button } from './create-element.js';
+
+export const ClickMe = customElement(({ title }) => [
+  h1(`Hello, ${title}!`),
+  p(
+    [
+      'You can attach event listeners with the `on` method',
+      'which is a context-free version of `addEvenListener`',
+      'and supports chaining.',
+    ].join(' '),
+  ),
+  button('Click me').on('click', () => {
+    console.log('clicked');
+  }),
+]);
 ```
 
 ## References

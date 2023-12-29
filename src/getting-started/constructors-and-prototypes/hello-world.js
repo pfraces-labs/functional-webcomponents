@@ -1,6 +1,6 @@
-export const HelloWorld = function () {
+export function HelloWorld() {
   return Reflect.construct(HTMLElement, [], HelloWorld);
-};
+}
 
 HelloWorld.prototype = Object.create(HTMLElement.prototype);
 

@@ -1,2 +1,2 @@
-import { Greeting } from './features/create-element/greeting.js';
-customElements.define('app-greeting', Greeting);
+import { ClickMe } from './features/event-listeners/click-me.js';
+customElements.define('click-me', ClickMe);
