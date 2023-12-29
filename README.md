@@ -6,14 +6,14 @@ functional fashion.
 ```js
 import { customElement, h1 } from 'functional-web-components';
 
-const Greeting = customElement(({ name = 'World' }) => h1(`Hello, ${name}!`));
+const GreetMe = customElement(({ name = 'World' }) => h1(`Hello, ${name}!`));
 
-customElements.define('app-greeting', Greeting);
+customElements.define('greet-me', GreetMe);
 ```
 
 ```html
 <body>
-  <app-greeting name="Functional Web Components"></app-greeting>
+  <greet-me name="Functional Web Components"></greet-me>
 </body>
 ```
 
@@ -33,7 +33,7 @@ Result:
 > `HTMLElement` and then define it with Custom Elements API.
 
 ```js
-class Greeting extends HTMLElement {
+class GreetMe extends HTMLElement {
   constructor() {
     super();
     const name = this.getAttribute('name') || 'World';
@@ -46,7 +46,7 @@ In contrast, the proposed `customElement` syntax is much more succinct and
 declarative, improving its readability.
 
 ```js
-const Greeting = customElement(({ name = 'World' }) => h1(`Hello, ${name}!`));
+const GreetMe = customElement(({ name = 'World' }) => h1(`Hello, ${name}!`));
 ```
 
 ## Getting Started
@@ -168,7 +168,7 @@ We can reflect attribute values by iterating `this.attributes` from the
 `constructor`.
 
 ```html
-<app-greeting name="World"></app-greeting>
+<greet-me name="World"></greet-me>
 ```
 
 `src/features/attributes/custom-element.js`
@@ -191,12 +191,12 @@ export const customElement = (render) => {
 };
 ```
 
-`src/features/attributes/greeting.js`
+`src/features/attributes/greet-me.js`
 
 ```js
-import { customElement } from './custom-element-attrs.js';
+import { customElement } from './custom-element.js';
 
-export const Greeting = customElement(({ name }) => `<h1>Hello, ${name}!</h1>`);
+export const GreetMe = customElement(({ name }) => `<h1>Hello, ${name}!</h1>`);
 ```
 
 ### HyperScript
@@ -242,13 +242,13 @@ export const p = createElementPartial('p');
 We can declare as many element creators as we need, then we will use them to
 build the component markup.
 
-`src/features/hyperscript/greeting.js`
+`src/features/hyperscript/greet-me.js`
 
 ```js
 import { customElement } from './custom-element.js';
 import { h1, p } from './create-element.js';
 
-export const Greeting = customElement(({ name }) => [
+export const GreetMe = customElement(({ name }) => [
   h1(`Hello, ${name}!`),
   p('No fragments needed'),
   p({ style: 'background-color: grey; padding: 10px;' }, 'Optional parameters'),

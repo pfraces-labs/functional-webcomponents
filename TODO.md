@@ -1,5 +1,11 @@
 # To Do
 
+## Project
+
+- [x] Format Markdown with Prettier: 80-characters print width
+- [x] Live reload
+- [x] Standalone examples
+
 ## Features
 
 - [x] Render function (`render(state) => dom`)
@@ -20,8 +26,9 @@
 
 - [ ] Benefits and drawbacks of using Shadow DOM
 - [ ] Component contents: `constructor` vs `connectedCallback`
-- [ ] Benefits and drawbacks of using `<template>` clones . [ ] Template
-      interpolation (slots?)
-- [ ] Are `document.createElement` created elements innert?
+  - <https://stackoverflow.com/questions/63066330/create-webcomponent-through-createelement>
+- [ ] Benefits and drawbacks of using `<template>` clones
+- [ ] Template interpolation (slots?)
+- [ ] Are `document.createElement`-created elements innert?
 - [ ] How to theme Shadow DOM CSS (CSS vars?)
-- [ ] Change detection (`Proxy` vs `MutationObserver` vs getters/setters)
+- [ ] Change detection (`Proxy`, `MutationObserver`, getters/setters, signals)
