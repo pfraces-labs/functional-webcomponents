@@ -3,6 +3,6 @@ export class HelloWorld extends HTMLElement {
     super();
 
     const shadowRoot = this.attachShadow({ mode: 'open' });
-    shadowRoot.innerHTML = 'Hello world!';
+    shadowRoot.innerHTML = '<h1>Hello, World!</h1>';
   }
 }

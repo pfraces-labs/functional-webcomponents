@@ -1,97 +1,103 @@
-# Functional WebComponents
+# Functional Web Components
 
-<https://hybrids.js.org/#/getting-started/concepts>
+This is a Proof of Concept for creating Custom Elements in a declarative and
+functional fashion.
+
+```js
+import { customElement, h1 } from 'functional-web-components';
+
+const Greeting = customElement(({ name = 'World' }) => h1(`Hello, ${name}!`));
+
+customElements.define('app-greeting', Greeting);
+```
+
+```html
+<body>
+  <app-greeting name="Functional Web Components"></app-greeting>
+</body>
+```
+
+Result:
+
+```html
+<body>
+  <h1>Hello, Functional Web Components!</h1>
+</body>
+```
+
+## Introduction
+
+<https://dev.to/hybrids/from-classes-to-plain-objects-and-pure-functions-2gip>
 
 > The only way to create a custom element is to use a class, which extends
-> `HTMLElement` and then define it with Custom Elements API:
+> `HTMLElement` and then define it with Custom Elements API.
 
 ```js
-class MyElement extends HTMLElement {
-  // ...
-}
-
-customElements.define('my-element', MyElement);
-```
-
-> However, the class syntax is only a sugar on top of the constructors and
-> prototypes.
-
-## Getting Started
-
-We are going to try several approaches for creating web components.
-
-Each approach will be placed on its own file and imported to the main
-`index.js` script which will load the custom component within the `hello-world` tag.
-
-**src/index.js**
-
-```js
-import { HelloWorld } from './src/getting-started/hello-world.js';
-
-customElements.define('hello-world', HelloWorld);
-```
-
-In the previous example we are importing the basic approach from the
-`hello-world.js` script.
-
-All approaches will export a `HelloWorld` class, so in order to test them we
-just have to change the imported file name to match the desired approach.
-
-```js
-// Shadow DOM approach
-import { HelloWorld } from './src/getting-started/hello-world-shadow-dom.js';
-```
-
-### Basic approach
-
-Let's see how to create a simple web component with the default class syntax.
-
-**src/getting-started/hello-world.js**
-
-```js
-export class HelloWorld extends HTMLElement {
-  connectedCallback() {
-    this.innerHTML = 'Hello world!';
+class Greeting extends HTMLElement {
+  constructor() {
+    super();
+    const name = this.getAttribute('name') || 'World';
+    this.innerHTML = `<h1>Hello, ${name}</h1>`;
   }
 }
 ```
 
-### Basic approach with Shadow DOM
+In contrast, the proposed `customElement` syntax is more declarative improving
+its readability.
 
-**src/getting-started/hello-world-shadow-dom.js**
+```js
+const Greeting = customElement(({ name = 'World' }) => h1(`Hello, ${name}!`));
+```
+
+## Getting Started
+
+Let's see how to create a simple web component with the default class syntax.
+
+`src/getting-started/dom-api/hello-world.js`
+
+```js
+export class HelloWorld extends HTMLElement {
+  connectedCallback() {
+    this.innerHTML = '<h1>Hello, World!</h1>';
+  }
+}
+```
+
+### Shadow DOM
+
+`src/getting-started/shadow-dom/hello-world.js`
 
 ```js
 export class HelloWorld extends HTMLElement {
   constructor() {
     super();
-
     const shadowRoot = this.attachShadow({ mode: 'open' });
-    shadowRoot.innerHTML = 'Hello world!';
+    shadowRoot.innerHTML = '<h1>Hello, World!</h1>';
   }
 }
 ```
 
-### No `class` approach
+### Constructors & Prototypes
 
 <https://stackoverflow.com/questions/45747646/what-is-the-es5-way-of-writing-web-component-classes>
 
-To simulate the default ES6 constructor that calls `super()`, we can use
-`Reflect.construct` to invoke the `HTMLElement` constructor but using the
-prototype from our `HelloWorld` consutrctor.
-
-For inheritance, you need to set the prototype of the `HelloWorld` constructor
-to an instance of `HTMLElement` and define methods and properties on that. It's
-conventional to use use `Object.create()` to create a non-functional dummy
-instance without invoking the constructor here.
+> To simulate the default ES6 constructor that calls `super()`, we can use
+> `Reflect.construct` to invoke the `HTMLElement` constructor but using the
+> prototype from our `HelloWorld` consutrctor.
+>
+> For inheritance, you need to set the prototype of the `HelloWorld` constructor
+> to an instance of `HTMLElement` and define methods and properties on that.
+> It's conventional to use use `Object.create()` to create a non-functional
+> dummy instance without invoking the constructor here.
 
 <https://github.com/WICG/webcomponents/issues/423>
 
-`HTMLElement.call(this)` would not work but `Reflect.construct` would.
+> `HTMLElement.call(this)` would not work but `Reflect.construct` would.
+>
+> All browsers that support custom elements v1 API would support
+> `Reflect.construct`.
 
-All browsers that support custom elements v1 API would support
-`Reflect.construct`.
-
-**src/getting-started/hello-world-noclass.js**
+`src/getting-started/constructors-and-prototypes/hello-world.js`
 
 ```js
 export const HelloWorld = function () {
@@ -101,57 +107,39 @@ export const HelloWorld = function () {
 HelloWorld.prototype = Object.create(HTMLElement.prototype);
 
 HelloWorld.prototype.connectedCallback = function () {
-  this.innerHTML = 'Hello world!';
+  this.innerHTML = '<h1>Hello, World!</h1>';
 };
-```
-
-## Functional custom elements
-
-Once we have the basics to build components without using the `class` keyword
-we can create an abstraction to build them in a functional style.
-
-The initial step is to provide an API to declare presentational Web Components
-emulating the React functional components API.
-
-**src/functional-custom-elements/custom-element-noclass.js**
-
-```js
-export const customElement = function (render) {
-  const CustomElement = function () {
-    return Reflect.construct(HTMLElement, [], CustomElement);
-  };
-
-  CustomElement.prototype = Object.create(HTMLElement.prototype);
-
-  CustomElement.prototype.connectedCallback = function () {
-    this.innerHTML = render();
-  };
-
-  return CustomElement;
-};
-```
-
-**src/functional-custom-elements/hello-world.js**
-
-```js
-import { customElement } from './custom-element.js';
-
-export const HelloWorld = customElement(function () {
-  return 'Hello World';
-});
 ```
 
 ### Class expressions
 
 <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/class>
 
-I didn't know about class expressions which allow to create classes dynamically
-reducing the complexity of the `customElement` implementation:
+Class expressions allows us to create classes dynamically reducing the
+complexity of the "constructor & prototype" approach.
 
-**src/functional-custom-elements/custom-element.js**
+`src/getting-started/class-expressions/hello-world.js`
 
 ```js
-export const customElement = function (render) {
+export const HelloWorld = class extends HTMLElement {
+  connectedCallback() {
+    this.innerHTML = '<h1>Hello, World!</h1>';
+  }
+};
+```
+
+### Render function
+
+Once we have the basics to build custom elements without using the `class`
+keyword we can create an abstraction to build them in a functional style.
+
+The initial step is to provide an API to declare presentational Web Components
+emulating the React functional components API.
+
+`src/getting-started/render-function/custom-element.js`
+
+```js
+export const customElement = (render) => {
   return class extends HTMLElement {
     constructor() {
       super();
@@ -161,50 +149,130 @@ export const customElement = function (render) {
 };
 ```
 
+`src/getting-started/render-function/hello-world.js`
+
+```js
+import { customElement } from './custom-element.js';
+
+export const HelloWorld = customElement(() => '<h1>Hello, World!</h1>');
+```
+
 ## Features
 
-Once we have a basic functional custom element implementation we can build other
-features on top
+Now that we have a basic functional `customElement` implementation we can build
+other features on top.
 
-### Get string data from element attributes
+### Attributes
 
 We can reflect attribute values by iterating `this.attributes` from the
 `constructor`.
 
-**src/features/custom-element-string-attrs.js**
+```html
+<app-greeting name="World"></app-greeting>
+```
+
+`src/features/attributes/custom-element.js`
 
 ```js
-const attrs = function (attributes) {
-  return [...attributes].reduce(function (acc, attribute) {
-    acc[attribute.name] = attribute.value;
-    return acc;
-  }, {});
+const attrsMap = (attributes) => {
+  return [...attributes].reduce(
+    (acc, attribute) => ({ ...acc, [attribute.name]: attribute.value }),
+    {},
+  );
 };
 
-export const customElement = function (render) {
+export const customElement = (render) => {
   return class extends HTMLElement {
     constructor() {
       super();
-      this.innerHTML = render(attrs(this.attributes));
+      this.innerHTML = render(attrsMap(this.attributes));
     }
   };
 };
 ```
 
-**src/features/greeting.js**
+`src/features/attributes/greeting.js`
 
 ```js
-import { customElement } from './custom-element-string-attrs.js';
+import { customElement } from './custom-element-attrs.js';
 
-export const Greeting = customElement(function (attrs) {
-  return `<h1>Hello, ${attrs.name}!</h1>`;
-});
+export const Greeting = customElement(({ name }) => `<h1>Hello, ${name}!</h1>`);
 ```
 
-**src/index.html**
+### Create Element
 
-```html
-<app-greeting name="World"></app-greeting>
+Current frontend frameworks using a render function to define component contents
+from JavaScript use one of the following approaches to declare the markup:
+
+- [JSX](https://react.dev/learn/writing-markup-with-jsx)
+- [Tagged Templates](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates)
+- A [HyperScript](https://github.com/hyperhype/hyperscript)-like syntax
+
+Let's implement our own HyperScript-like syntax.
+
+`src/features/create-element/create-element.js`
+
+```js
+const isString = (value) => typeof value === 'string';
+const createTextNode = (content) => document.createTextNode(content);
+
+export const createElement = ({ tagName, props = {}, children = [] }) => {
+  const element = document.createElement(tagName);
+  Object.assign(element, props);
+
+  children.forEach((child) => {
+    element.appendChild(isString(child) ? createTextNode(child) : child);
+  });
+
+  return element;
+};
+```
+
+With the `createElement` function and a little bit of JavaScript magic, we can
+create a clean API for building DOM elements.
+
+`src/features/create-element/create-element.js`
+
+```js
+export const div = createElementPartial('div');
+export const h1 = createElementPartial('h1');
+export const p = createElementPartial('p');
+```
+
+We can declare as many element creators as we need, then we will use them to
+build the component markup.
+
+`src/features/create-element/greeting.js`
+
+```js
+import { customElement } from './custom-element.js';
+import { h1, p } from './create-element.js';
+
+export const Greeting = customElement(({ name }) => [
+  h1(`Hello, ${name}!`),
+  p('No fragments needed'),
+  p({ style: 'background-color: grey; padding: 10px;' }, 'Optional parameters'),
+]);
+```
+
+The `customElement` function has been updated to receive either a DOM tree or an
+array of DOM trees.
+
+`src/features/create-element/custom-element.js`
+
+```js
+export const customElement = (render) => {
+  return class extends HTMLElement {
+    constructor() {
+      super();
+      const children = [].concat(render(attrsMap(this.attributes)));
+
+      children.forEach((child) => {
+        this.appendChild(child);
+      });
+    }
+  };
+};
 ```
 
 ## References

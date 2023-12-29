@@ -5,5 +5,5 @@ export const HelloWorld = function () {
 HelloWorld.prototype = Object.create(HTMLElement.prototype);
 
 HelloWorld.prototype.connectedCallback = function () {
-  this.innerHTML = 'Hello world!';
+  this.innerHTML = '<h1>Hello, World!</h1>';
 };

@@ -1,4 +1,4 @@
-export const customElement = function (render) {
+export const customElement = (render) => {
   return class extends HTMLElement {
     constructor() {
       super();
