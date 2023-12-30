@@ -593,6 +593,157 @@ export const OrderedList = customElement(({ items, dispatch }) => [
 </body>
 ```
 
+`OrderList` component can access to the attached `data` property since the
+inline script code is executed before the component `constructor`.
+
+### Lifecycle Callbacks
+
+[Custom element lifecycle callbacks](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements#custom_element_lifecycle_callbacks)
+
+> Once your custom element is registered, the browser will call certain methods
+> of your class when code in the page interacts with your custom element in
+> certain ways. By providing an implementation of these methods, which the
+> specification calls lifecycle callbacks, you can run code in response to these
+> events.
+
+Custom element lifecycle callbacks:
+
+- `connectedCallback()`: called each time the element is added to the document.
+- `disconnectedCallback()`: called each time the element is removed from the
+  document.
+- `adoptedCallback()`: called each time the element is moved to a new document.
+- `attributeChangedCallback()`: called when attributes are changed, added,
+  removed, or replaced.
+
+```js
+class MyCustomElement extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    console.log('Custom element added to page.');
+  }
+
+  disconnectedCallback() {
+    console.log('Custom element removed from page.');
+  }
+}
+```
+
+We are goint to provide a `onMount` function through the component props which
+will let us use the `connectedCallback` and `disconnectedCallback` lifecycle
+callbacks with a syntax similar to React's `useEffect`:
+
+```js
+onMount(() => function onUnmount() {});
+```
+
+[src/features/lifecycle-callbacks/custom-element.js](src/features/lifecycle-callbacks/custom-element.js)
+
+```js
+const mountListener = (element) => {
+  return (onMount) => {
+    element.onMount = () => {
+      element.onUnmount = onMount();
+    };
+  };
+};
+
+export const customElement = (render) => {
+  return class extends HTMLElement {
+    constructor() {
+      // ...
+      this.onMount = noop;
+      this.onUnmount = noop;
+
+      const children = render({
+        ...attrsMap([...this.attributes]),
+        ...this.data,
+        dispatch: customEventDispatcher(this),
+        onMount: mountListener(this)
+      });
+
+      // ...
+    }
+
+    connectedCallback() {
+      this.onMount();
+    }
+
+    disconnectedCallback() {
+      this.onUnmount();
+    }
+  };
+};
+```
+
+[src/features/lifecycle-callbacks/seconds-counter.js](src/features/lifecycle-callbacks/seconds-counter.js)
+
+```js
+import { customElement } from './custom-element.js';
+import { h1, p } from './hyperscript.js';
+
+export const SecondsCounter = customElement(({ onMount }) => {
+  onMount(() => {
+    let counter = 0;
+
+    const intervalId = setInterval(() => {
+      console.log(counter++);
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  });
+
+  return [
+    h1('Seconds Counter'),
+    p(
+      [
+        'This component implements an internal counter that increments its',
+        'value every second logging its updated value to the console.'
+      ].join(' ')
+    ),
+    p(
+      [
+        'The counter is activated when the component mounts, and deactivated',
+        'when unmounts.'
+      ].join(' ')
+    )
+  ];
+});
+```
+
+[src/features/lifecycle-callbacks/index.html](src/features/lifecycle-callbacks/index.html)
+
+```html
+<body>
+  <button id="mount-toggler">Unmount</button>
+
+  <div id="container">
+    <seconds-counter id="seconds-counter"></seconds-counter>
+  </div>
+
+  <script type="module">
+    const container = document.getElementById('container');
+    const secondsCounter = document.getElementById('seconds-counter');
+    const mountToggler = document.getElementById('mount-toggler');
+
+    mountToggler.addEventListener('click', () => {
+      if (mountToggler.textContent === 'Unmount') {
+        secondsCounter.remove();
+        mountToggler.textContent = 'Mount';
+        return;
+      }
+
+      container.appendChild(secondsCounter);
+      mountToggler.textContent = 'Unmount';
+    });
+  </script>
+</body>
+```
+
 ## References
 
 - [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components)

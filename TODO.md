@@ -12,10 +12,10 @@
 ## Getting Started
 
 - [x] DOM API
-- [x] Shadow DOM
 - [x] Constructors & Prototypes
 - [x] Class expressions
-- [x] Render function (`render(state) => dom`)
+- [x] Shadow DOM
+- [x] Render function
 
 ## Features
 
@@ -24,14 +24,11 @@
 - [x] Event listeners
 - [x] Custom events
 - [x] Default styles
-- [x] Complex data (element props)
+- [x] Complex data
+- [x] Lifecycle callbacks
 - [ ] Nested components
 - [ ] Children rendering (slots?)
-- [ ] Lifecycle hooks (`onMount() => onUnmount`)
-- [ ] Conditional rendering
-- [ ] React to state changes
 - [ ] Fine-grained reactivity (re-render only what is needed)
-- [ ] Pure and Stateful components
 
 ## Research
 

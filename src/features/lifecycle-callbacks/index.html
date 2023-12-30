@@ -1,0 +1,35 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Functional Web Components</title>
+    <script type="module" src="register.js"></script>
+  </head>
+
+  <body>
+    <button id="mount-toggler">Unmount</button>
+
+    <div id="container">
+      <seconds-counter id="seconds-counter"></seconds-counter>
+    </div>
+
+    <script type="module">
+      const container = document.getElementById('container');
+      const secondsCounter = document.getElementById('seconds-counter');
+      const mountToggler = document.getElementById('mount-toggler');
+
+      mountToggler.addEventListener('click', () => {
+        if (mountToggler.textContent === 'Unmount') {
+          secondsCounter.remove();
+          mountToggler.textContent = 'Mount';
+          return;
+        }
+
+        container.appendChild(secondsCounter);
+        mountToggler.textContent = 'Unmount';
+      });
+    </script>
+  </body>
+</html>
