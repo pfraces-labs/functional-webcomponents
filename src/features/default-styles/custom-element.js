@@ -27,8 +27,8 @@ export const customElement = (render) => {
       shadowRoot.adoptedStyleSheets = [defaultStyleSheet];
 
       const children = render({
-        dispatch: customEventDispatcher(this),
-        ...attrsMap([...this.attributes])
+        ...attrsMap([...this.attributes]),
+        dispatch: customEventDispatcher(this)
       });
 
       [].concat(children).forEach((child) => {

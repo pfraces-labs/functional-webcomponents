@@ -1,0 +1,23 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Functional Web Components</title>
+    <script type="module" src="register.js"></script>
+  </head>
+
+  <body>
+    <ordered-list></ordered-list>
+
+    <script>
+      const orderedList = document.querySelector('ordered-list');
+      orderedList.data = { items: ['Foo', 'Bar', 'Qux'] };
+
+      orderedList.addEventListener('item-click', ({ detail }) => {
+        console.log(detail);
+      });
+    </script>
+  </body>
+</html>

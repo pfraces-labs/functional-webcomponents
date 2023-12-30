@@ -24,6 +24,7 @@ export const customElement = (render) => {
 
       const children = render({
         ...attrsMap([...this.attributes]),
+        ...this.data,
         dispatch: customEventDispatcher(this)
       });
 

@@ -200,9 +200,9 @@ We can reflect attribute values by iterating `this.attributes` from the
 
 ```js
 const attrsMap = (attributes) => {
-  return [...attributes].reduce(
+  return attributes.reduce(
     (acc, attribute) => ({ ...acc, [attribute.name]: attribute.value }),
-    {},
+    {}
   );
 };
 
@@ -211,7 +211,7 @@ export const customElement = (render) => {
     constructor() {
       super();
       const shadowRoot = this.attachShadow({ mode: 'open' });
-      shadowRoot.innerHTML = render(attrsMap(this.attributes));
+      shadowRoot.innerHTML = render(attrsMap([...this.attributes]));
     }
   };
 };
@@ -254,13 +254,35 @@ export const createElement = ({ tagName, props = {}, children = [] }) => {
 };
 ```
 
-With the `createElement` function and a little bit of JavaScript magic, we can
-create a clean API for building DOM elements.
+Let's create a `createElement`-wrapper to build a cleaner API for building DOM
+elements.
 
 [src/features/hyperscript/hyperscript.js](src/features/hyperscript/hyperscript.js)
 
 ```js
-export const div = createElementPartial('div');
+const createElementConfig = (tagName, ...options) => {
+  return options.reduce(
+    (acc, option) => {
+      if (isPlainObject(option)) {
+        return { ...acc, props: option };
+      }
+
+      if (isArray(option)) {
+        return { ...acc, children: option };
+      }
+
+      return { ...acc, children: [option] };
+    },
+    { tagName }
+  );
+};
+
+export const createElementPartial = (tagName) => {
+  return (...options) => {
+    return createElement(createElementConfig(tagName, ...options));
+  };
+};
+
 export const h1 = createElementPartial('h1');
 export const p = createElementPartial('p');
 ```
@@ -277,12 +299,12 @@ import { h1, p } from './create-element.js';
 export const GreetMe = customElement(({ name }) => [
   h1(`Hello, ${name}!`),
   p('No fragments needed'),
-  p({ style: 'background-color: grey; padding: 10px;' }, 'Optional parameters'),
+  p({ style: 'background-color: grey; padding: 10px;' }, 'Optional parameters')
 ]);
 ```
 
-The `customElement` function has been updated to receive either a DOM tree or an
-array of DOM trees.
+The `customElement` function has been updated to receive either a DOM node or an
+array of DOM nodes.
 
 [src/features/hyperscript/custom-element.js](src/features/hyperscript/custom-element.js)
 
@@ -292,7 +314,7 @@ export const customElement = (render) => {
     constructor() {
       super();
       const shadowRoot = this.attachShadow({ mode: 'open' });
-      const children = render(attrsMap(this.attributes));
+      const children = render(attrsMap([...this.attributes]));
 
       [].concat(children).forEach((child) => {
         shadowRoot.appendChild(child);
@@ -324,13 +346,7 @@ export const createElement = ({ tagName, props = {}, children = [] }) => {
     return element;
   };
 
-  Object.assign(element, props);
-
-  children.forEach((child) => {
-    element.appendChild(isString(child) ? createTextNode(child) : child);
-  });
-
-  return element;
+  // ...
 };
 ```
 
@@ -346,19 +362,19 @@ export const ClickMe = customElement(({ title }) => [
     [
       'You can attach event listeners with the `on` method',
       'which is a context-free version of `addEvenListener`',
-      'and supports chaining.',
-    ].join(' '),
+      'and supports chaining.'
+    ].join(' ')
   ),
   button('Click me').on('click', () => {
     console.log('clicked');
-  }),
+  })
 ]);
 ```
 
 ### Custom Events
 
 JSX-based frameworks tend to pass callbacks through props from parent to child
-to accomplish child to parent communication.
+to accomplish child-to-parent communication.
 
 In contrast, with native DOM APIs, we add event listeners via `addEventListener`
 to accomplish the same. This is a more intuitive abstraction if we consider
@@ -375,8 +391,8 @@ const customEventDispatcher = (element) => {
     element.dispatchEvent(
       new CustomEvent(eventName, {
         bubbles: true,
-        detail,
-      }),
+        detail
+      })
     );
   };
 };
@@ -384,17 +400,14 @@ const customEventDispatcher = (element) => {
 export const customElement = (render) => {
   return class extends HTMLElement {
     constructor() {
-      super();
-      const shadowRoot = this.attachShadow({ mode: 'open' });
+      // ...
 
       const children = render({
+        ...attrsMap([...this.attributes])
         dispatch: customEventDispatcher(this),
-        ...attrsMap(this.attributes),
       });
 
-      [].concat(children).forEach((child) => {
-        shadowRoot.appendChild(child);
-      });
+      // ...
     }
   };
 };
@@ -414,7 +427,7 @@ export const InputNumber = customElement(({ value, dispatch }) => [
   }),
   button('-').on('click', () => {
     dispatch('decrement');
-  }),
+  })
 ]);
 ```
 
@@ -472,15 +485,7 @@ export const customElement = (render) => {
       super();
       const shadowRoot = this.attachShadow({ mode: 'open' });
       shadowRoot.adoptedStyleSheets = [defaultStyleSheet];
-
-      const children = render({
-        dispatch: customEventDispatcher(this),
-        ...attrsMap(this.attributes),
-      });
-
-      [].concat(children).forEach((child) => {
-        shadowRoot.appendChild(child);
-      });
+      // ...
     }
   };
 };
@@ -502,6 +507,94 @@ but it has its drawbacks:
 For those reasons we are going to do without this feature and keep it just in
 the default styles example for reference.
 
+## Complex Data
+
+By using attributes, we can only pass string values to the components. To pass
+any kind of data we need to make use of the component properties.
+
+We are already passing data through properties when using our HyperScript
+functions.
+
+[src/features/complex-data/hyperscript.js](src/features/complex-data/hyperscript.js)
+
+```js
+export const createElement = ({ tagName, props = {}, children = [] }) => {
+  const element = document.createElement(tagName);
+  // ...
+  Object.assign(element, props);
+  // ...
+};
+```
+
+What is lacking is the ability to read those properties from the component
+definition.
+
+We want both attributes and properties as inputs of our components. We will use
+attributes when using the component from HTML and properties when using the
+component from another component through HyperScript.
+
+Also, we want to provide only explicitly declared properties, hiding away the
+ones provided by the DOM.
+
+[src/features/complex-data/custom-element.js](src/features/complex-data/custom-element.js)
+
+```js
+export const customElement = (render) => {
+  return class extends HTMLElement {
+    constructor() {
+      // ...
+
+      const children = render({
+        ...attrsMap([...this.attributes]),
+        ...this.data,
+        dispatch: customEventDispatcher(this)
+      });
+
+      // ...
+    }
+  };
+};
+```
+
+[src/features/complex-data/ordered-list.js](src/features/complex-data/ordered-list.js)
+
+```js
+import { customElement } from './custom-element.js';
+import { h1, ol, li, button } from './hyperscript.js';
+
+export const OrderedList = customElement(({ items, dispatch }) => [
+  h1('Ordered List'),
+  ol(
+    items.map((item) =>
+      li(
+        button(item).on('click', () => {
+          dispatch('item-click', item);
+        })
+      )
+    )
+  )
+]);
+```
+
+[src/features/complex-data/index.html](src/features/complex-data/index.html)
+
+```html
+<body>
+  <ordered-list></ordered-list>
+
+  <script>
+    const orderedList = document.querySelector('ordered-list');
+    orderedList.data = { items: ['Foo', 'Bar', 'Qux'] };
+
+    orderedList.addEventListener('item-click', ({ detail }) => {
+      console.log(detail);
+    });
+  </script>
+</body>
+```
+
 ## References
 
-- <https://developer.mozilla.org/en-US/docs/Web/Web_Components>
+- [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components)
+- [Custom Element Best Practices](https://web.dev/articles/custom-elements-best-practices)
+- [Handling data with Web Components](https://itnext.io/handling-data-with-web-components-9e7e4a452e6e)

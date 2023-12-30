@@ -24,13 +24,14 @@
 - [x] Event listeners
 - [x] Custom events
 - [x] Default styles
-- [ ] Complex data (element props)
+- [x] Complex data (element props)
+- [ ] Nested components
 - [ ] Children rendering (slots?)
 - [ ] Lifecycle hooks (`onMount() => onUnmount`)
 - [ ] Conditional rendering
 - [ ] React to state changes
-- [ ] Pure and Stateful components
 - [ ] Fine-grained reactivity (re-render only what is needed)
+- [ ] Pure and Stateful components
 
 ## Research
 
