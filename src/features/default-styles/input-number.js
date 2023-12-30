@@ -9,5 +9,5 @@ export const InputNumber = customElement(({ value, dispatch }) => [
   }),
   button('-').on('click', () => {
     dispatch('decrement');
-  }),
+  })
 ]);

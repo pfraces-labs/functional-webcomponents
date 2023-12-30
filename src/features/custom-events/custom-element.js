@@ -1,7 +1,7 @@
 const attrsMap = (attributes) => {
   return [...attributes].reduce(
     (acc, attribute) => ({ ...acc, [attribute.name]: attribute.value }),
-    {},
+    {}
   );
 };
 
@@ -10,8 +10,8 @@ const customEventDispatcher = (element) => {
     element.dispatchEvent(
       new CustomEvent(eventName, {
         bubbles: true,
-        detail,
-      }),
+        detail
+      })
     );
   };
 };
@@ -24,7 +24,7 @@ export const customElement = (render) => {
 
       const children = render({
         dispatch: customEventDispatcher(this),
-        ...attrsMap(this.attributes),
+        ...attrsMap(this.attributes)
       });
 
       [].concat(children).forEach((child) => {

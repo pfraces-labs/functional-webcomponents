@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "Functional WebComponents",
   "scripts": {
-    "start": "live-server src/"
+    "start": "live-server src/",
+    "format": "prettier --write ."
   },
   "license": "ISC",
   "devDependencies": {

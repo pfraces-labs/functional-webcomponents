@@ -32,7 +32,7 @@ const createElementConfig = (tagName, ...options) => {
 
       return acc;
     },
-    { tagName },
+    { tagName }
   );
 };
 

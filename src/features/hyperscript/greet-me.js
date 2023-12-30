@@ -6,6 +6,6 @@ export const GreetMe = customElement(({ name }) => [
   p('No fragments needed'),
   p(
     { style: 'background-color: lightblue; padding: 10px;' },
-    'Optional parameters',
-  ),
+    'Optional parameters'
+  )
 ]);

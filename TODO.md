@@ -2,7 +2,8 @@
 
 ## Project
 
-- [x] Format Markdown with Prettier: 80-characters print width
+- [x] Prettier: Markdown with 80-characters print width
+- [x] Prettier: No trailing commas
 - [x] Live reload
 - [x] Standalone examples
 - [ ] ESLint: Unused and undeclared variables
@@ -21,7 +22,7 @@
 - [x] HyperScript
 - [x] Event listeners
 - [x] Custom events
-- [ ] Display block (`:host { display: block; }`)
+- [x] Default styles
 - [ ] Complex data (element props)
 - [ ] Children rendering (slots?)
 - [ ] Lifecycle hooks (`onMount() => onUnmount`)

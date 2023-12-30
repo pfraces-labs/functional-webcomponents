@@ -7,10 +7,10 @@ export const ClickMe = customElement(({ title }) => [
     [
       'You can attach event listeners with the `on` method',
       'which is a context-free version of `addEvenListener`',
-      'and supports chaining.',
-    ].join(' '),
+      'and supports chaining.'
+    ].join(' ')
   ),
   button('Click me').on('click', () => {
     console.log('clicked');
-  }),
+  })
 ]);

@@ -1,7 +1,7 @@
 const attrsMap = (attributes) => {
   return [...attributes].reduce(
     (acc, attribute) => ({ ...acc, [attribute.name]: attribute.value }),
-    {},
+    {}
   );
 };
 
