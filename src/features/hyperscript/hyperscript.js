@@ -1,5 +1,5 @@
 const isString = (value) => typeof value === 'string';
-const isObject = (value) => value?.constructor === Object;
+const isPlainObject = (value) => value?.constructor === Object;
 const isArray = Array.isArray;
 
 const createTextNode = (content) => document.createTextNode(content);
@@ -18,7 +18,7 @@ export const createElement = ({ tagName, props = {}, children = [] }) => {
 const createElementConfig = (tagName, ...options) => {
   return options.reduce(
     (acc, option) => {
-      if (isObject(option)) {
+      if (isPlainObject(option)) {
         return { ...acc, props: option };
       }
 
@@ -26,11 +26,7 @@ const createElementConfig = (tagName, ...options) => {
         return { ...acc, children: option };
       }
 
-      if (isString(option)) {
-        return { ...acc, children: [option] };
-      }
-
-      return acc;
+      return { ...acc, children: [option] };
     },
     { tagName }
   );
