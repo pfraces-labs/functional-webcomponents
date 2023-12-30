@@ -2,13 +2,23 @@
   "name": "functional-webcomponents",
   "version": "0.1.0",
   "description": "Functional WebComponents",
+  "type": "module",
   "scripts": {
     "start": "live-server src/",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "lint:js": "eslint .",
+    "lint:css": "stylelint **/*.css",
+    "lint:md": "markdownlint-cli2 **/*.md !node_modules"
   },
   "license": "ISC",
   "devDependencies": {
+    "@eslint/js": "^8.56.0",
+    "eslint": "^8.56.0",
+    "globals": "^13.24.0",
+    "htmlhint": "^1.1.4",
     "live-server": "^1.2.2",
-    "prettier": "^3.1.1"
+    "markdownlint-cli2": "^0.11.0",
+    "prettier": "^3.1.1",
+    "stylelint": "^16.1.0"
   }
 }

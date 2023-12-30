@@ -2,11 +2,12 @@
 
 ## Project
 
+- [x] ESLint: Unused and undeclared variables
+- [x] Lint HTML: Unclosed tags
 - [x] Prettier: Markdown with 80-characters print width
 - [x] Prettier: No trailing commas
 - [x] Live reload
 - [x] Standalone examples
-- [ ] ESLint: Unused and undeclared variables
 
 ## Getting Started
 
