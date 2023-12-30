@@ -445,6 +445,63 @@ its parents. This behavior also allows for implementing
 </body>
 ```
 
+### Default Styles
+
+[Style custom elements in HTML5](https://stackoverflow.com/a/40082136/1815446)
+
+> HTML Custom Elements by default are defined as an undefined element, similar
+> to a span. As an undefined element which the browser has never seen before,
+> they have no default user agent styling and will be given inherited values and
+> will be seen as an inline element which is the default for all elements apart
+> from when a user agent stylesheet overrides it due to conforming with the W3C
+> Recommendated defaults.
+
+With the previous implementations, if we added a background color to a component
+it only be applied to the text nodes. To apply styles to the whole component, we
+need to declare the component as `display: block;`.
+
+[src/features/default-styles/custom-element.js](src/features/default-styles/custom-element.js)
+
+```js
+const defaultStyleSheet = new CSSStyleSheet();
+defaultStyleSheet.replaceSync(':host { display: block; }');
+
+export const customElement = (render) => {
+  return class extends HTMLElement {
+    constructor() {
+      super();
+      const shadowRoot = this.attachShadow({ mode: 'open' });
+      shadowRoot.adoptedStyleSheets = [defaultStyleSheet];
+
+      const children = render({
+        dispatch: customEventDispatcher(this),
+        ...attrsMap(this.attributes),
+      });
+
+      [].concat(children).forEach((child) => {
+        shadowRoot.appendChild(child);
+      });
+    }
+  };
+};
+```
+
+[src/features/default-styles/index.html](src/features/default-styles/index.html)
+
+```html
+<input-number value="0" style="background-color: lightgrey"></input-number>
+```
+
+At first, having `display: block;` applied to components seems a good default,
+but it has its drawbacks:
+
+- It adds more computation to the creation of new components which could mean a
+  performance penalty when creating lots of them
+- It changes the default behavior defined in the standard
+
+For those reasons we are going to do without this feature and keep it just in
+the default styles example for reference.
+
 ## References
 
 - <https://developer.mozilla.org/en-US/docs/Web/Web_Components>
