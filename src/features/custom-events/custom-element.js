@@ -1,5 +1,5 @@
 const attrsMap = (attributes) => {
-  return [...attributes].reduce(
+  return attributes.reduce(
     (acc, attribute) => ({ ...acc, [attribute.name]: attribute.value }),
     {}
   );
@@ -24,7 +24,7 @@ export const customElement = (render) => {
 
       const children = render({
         dispatch: customEventDispatcher(this),
-        ...attrsMap(this.attributes)
+        ...attrsMap([...this.attributes])
       });
 
       [].concat(children).forEach((child) => {
