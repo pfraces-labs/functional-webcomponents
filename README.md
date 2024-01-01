@@ -907,14 +907,14 @@ template tag.
 Thanks to HTML slots, we don't need to code any specific behavior in our
 `customElement` implementation to accomplish content projection.
 
-[src/features/content-projection/html-elements.js](src/features/content-projection/html-elements.js)
+[src/features/component-composition/html-elements.js](src/features/component-composition/html-elements.js)
 
 ```js
 export const style = createElementPartial('style');
 export const slot = createElementPartial('slot');
 ```
 
-[src/features/content-projection/app-layout.js](src/features/content-projection/app-layout.js)
+[src/features/component-composition/app-layout.js](src/features/component-composition/app-layout.js)
 
 ```js
 import { customElement } from './custom-element.js';
@@ -935,7 +935,7 @@ export const AppLayout = customElement(() => [
 ]);
 ```
 
-[src/features/content-projection/landing-page.js](src/features/content-projection/landing-page.js)
+[src/features/component-composition/landing-page.js](src/features/component-composition/landing-page.js)
 
 ```js
 import { customElement } from './custom-element.js';
@@ -954,7 +954,7 @@ export const LandingPage = customElement(() => [
 ]);
 ```
 
-[src/features/content-projection/index.html](src/features/content-projection/index.html)
+[src/features/component-composition/index.html](src/features/component-composition/index.html)
 
 ```html
 <body>
