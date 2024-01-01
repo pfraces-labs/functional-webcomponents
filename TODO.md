@@ -13,21 +13,22 @@
 
 - [x] DOM API
 - [x] Constructors & Prototypes
-- [x] Class expressions
+- [x] Class Expressions
 - [x] Shadow DOM
-- [x] Render function
+- [x] Render Function
 
 ## Features
 
 - [x] Attributes
 - [x] HyperScript
-- [x] Event listeners
-- [x] Custom events
-- [x] Default styles
-- [x] Complex data
-- [x] Lifecycle callbacks
-- [ ] Nested components
-- [ ] Children rendering (slots?)
+- [x] Event Listeners
+- [x] Custom Events
+- [x] Default Styles
+- [x] Complex Data
+- [x] Lifecycle Callbacks
+- [x] Multiple Lifecycle Callbacks
+- [ ] Children
+- [ ] Nested / Hierarchy
 - [ ] Fine-grained reactivity (re-render only what is needed)
 
 ## Research

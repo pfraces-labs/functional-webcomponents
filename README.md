@@ -658,9 +658,7 @@ export const customElement = (render) => {
       this.onUnmount = noop;
 
       const children = render({
-        ...attrsMap([...this.attributes]),
-        ...this.data,
-        dispatch: customEventDispatcher(this),
+        // ...
         onMount: mountListener(this)
       });
 
@@ -743,6 +741,123 @@ export const SecondsCounter = customElement(({ onMount }) => {
   </script>
 </body>
 ```
+
+### Multiple LifeCycle Callbacks
+
+With the previous implementation, if we call `onMount` more than once, each call
+will overwrite the previous one. The last `onMount` call is the only one being
+executed.
+
+[src/features/multiple-lifecycle-callbacks/index.html](src/features/multiple-lifecycle-callbacks/index.html)
+
+```js
+import { customElement } from './custom-element.js';
+import { h1, p } from './hyperscript.js';
+
+export const LifecycleLogger = customElement(({ onMount }) => {
+  onMount(() => {
+    console.log('1st `unMount`: Mounted');
+
+    return () => {
+      console.log('1st `unMount`: Unmounted');
+    };
+  });
+
+  onMount(() => {
+    console.log('2nd `unMount`: Mounted');
+
+    return () => {
+      console.log('2nd `unMount`: Unmounted');
+    };
+  });
+
+  onMount(() => {
+    console.log('3rd `unMount`: Mounted');
+
+    return () => {
+      console.log('3rd `unMount`: Unmounted');
+    };
+  });
+
+  return [
+    h1('Lyfecycle Logger'),
+    p('Multiple lifecycle callbacks declared. Check out the console output.')
+  ];
+});
+```
+
+Console output after unmounting:
+
+```text
+3rd `unMount`: Mounted
+3rd `unMount`: Unmounted
+```
+
+What we want is to be able to declare lifecycle callbacks multiple times so we
+can separate concerns.
+
+Desired output after unmounting:
+
+```text
+1st `unMount`: Mounted
+2nd `unMount`: Mounted
+3rd `unMount`: Mounted
+1st `unMount`: Unmounted
+2nd `unMount`: Unmounted
+3rd `unMount`: Unmounted
+```
+
+[src/features/multiple-lifecycle-callbacks/custom-element.js](src/features/multiple-lifecycle-callbacks/custom-element.js)
+
+```js
+const addMountListener = (element) => {
+  return (mountListener) => {
+    element.mountListeners.push(() => {
+      const unmountListener = mountListener();
+
+      if (isFunction(unmountListener)) {
+        element.unmountListeners.push(unmountListener);
+      }
+    });
+  };
+};
+
+export const customElement = (render) => {
+  return class extends HTMLElement {
+    constructor() {
+      // ...
+      this.mountListeners = [];
+      this.unmountListeners = [];
+
+      const children = render({
+        // ...
+        onMount: addMountListener(this)
+      });
+
+      // ...
+    }
+
+    connectedCallback() {
+      this.mountListeners.forEach((listener) => {
+        listener();
+      });
+    }
+
+    disconnectedCallback() {
+      const unmountListeners = this.unmountListeners;
+      this.unmountListeners = [];
+
+      unmountListeners.forEach((listener) => {
+        listener();
+      });
+    }
+  };
+};
+```
+
+Replacing `unmounListeners` with an empty array at `disconnectedCallback` is
+needed, otherwise subsequent `mountListener` calls would cause undesired
+`unmountListener` duplication.
 
 ## References
 
