@@ -27,9 +27,10 @@
 - [x] Complex Data
 - [x] Lifecycle Callbacks
 - [x] Multiple Lifecycle Callbacks
-- [ ] Children
-- [ ] Nested / Hierarchy
-- [ ] Fine-grained reactivity (re-render only what is needed)
+- [x] Component Composition
+- [ ] CSS Files
+- [ ] Using Components From HyperScript
+- [ ] Fine-grained Reactivity
 
 ## Research
 
@@ -37,7 +38,6 @@
 - [ ] Component contents: `constructor` vs `connectedCallback`
   - <https://stackoverflow.com/questions/63066330/create-webcomponent-through-createelement>
 - [ ] Benefits and drawbacks of using `<template>` clones
-- [ ] Template interpolation (slots?)
 - [ ] Are `document.createElement`-created elements innert?
 - [ ] How to theme Shadow DOM CSS (CSS vars?)
 - [ ] Change detection (`Proxy`, `MutationObserver`, getters/setters, signals)

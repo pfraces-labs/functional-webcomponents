@@ -1,0 +1,33 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Functional Web Components</title>
+    <script type="module" src="register.js"></script>
+  </head>
+
+  <body>
+    <style>
+      body {
+        margin: 0;
+        font-family: sans-serif;
+      }
+    </style>
+
+    <app-layout>
+      <span slot="app-name">Component Composition</span>
+
+      <landing-page></landing-page>
+
+      <p>Children without a slot attribute are added to the unnamed slot</p>
+
+      <ul>
+        <li>Foo</li>
+        <li>Bar</li>
+        <li>Qux</li>
+      </ul>
+    </app-layout>
+  </body>
+</html>

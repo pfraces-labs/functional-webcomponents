@@ -859,6 +859,128 @@ Replacing `unmounListeners` with an empty array at `disconnectedCallback` is
 needed, otherwise subsequent `mountListener` calls would cause undesired
 `unmountListener` duplication.
 
+### Component Composition
+
+[Content Projection](https://angular.io/guide/content-projection)
+
+> Content projection is a pattern in which you insert, or project, the content
+> you want to use inside another component. For example, you could have a Card
+> component that accepts content provided by another component.
+
+```html
+<card-component>
+  <another-component></another-component>
+</card-component>
+```
+
+[Composition and slots](https://www.webcomponents.org/specs#composition-and-slots)
+
+> By default, if an element has shadow DOM, the shadow tree is rendered instead
+> of the element's children. To allow children to render, you need to add
+> placeholders for them in your shadow tree.
+>
+> Consider the following shadow tree for `<my-header>`:
+
+```html
+<header>
+  <h1><slot></slot></h1>
+  <button>Menu</button>
+</header>
+```
+
+> The user can add children like this:
+
+```html
+<my-header>Shadow DOM</my-header>
+```
+
+Let's use slots from the HTML spec to accomplish content projection.
+
+[Using templates and slots](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_templates_and_slots)
+
+> An unnamed slot will be filled with all of the custom element's top-level
+> child nodes that do not have the slot attribute. This includes text nodes.
+
+Although not specified in the documentation, slots can be used without the
+template tag.
+
+Thanks to HTML slots, we don't need to code any specific behavior in our
+`customElement` implementation to accomplish content projection.
+
+[src/features/content-projection/html-elements.js](src/features/content-projection/html-elements.js)
+
+```js
+export const style = createElementPartial('style');
+export const slot = createElementPartial('slot');
+```
+
+[src/features/content-projection/app-layout.js](src/features/content-projection/app-layout.js)
+
+```js
+import { customElement } from './custom-element.js';
+import { style, h1, slot } from './html-elements.js';
+
+export const AppLayout = customElement(() => [
+  style(`
+    .header {
+      margin: 0;
+      padding: 5px 10px;
+      background-color: #0079bf;
+      color: white;
+      font-size: 1.8rem;
+    }
+  `),
+  h1({ className: 'header' }, slot({ name: 'app-name' }, 'App Name')),
+  slot()
+]);
+```
+
+[src/features/content-projection/landing-page.js](src/features/content-projection/landing-page.js)
+
+```js
+import { customElement } from './custom-element.js';
+import { style, h2, p } from './html-elements.js';
+
+export const LandingPage = customElement(() => [
+  style(`
+    :host {
+      display: block;
+      background-color: lightgray;
+      padding: 10px;
+    }
+  `),
+  h2('Landing Page'),
+  p('This is the content of the landing page')
+]);
+```
+
+[src/features/content-projection/index.html](src/features/content-projection/index.html)
+
+```html
+<body>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+  </style>
+
+  <app-layout>
+    <span slot="app-name">Functional Web Components</span>
+
+    <landing-page></landing-page>
+
+    <p>Children without a slot attribute are added to the unnamed slot</p>
+
+    <ul>
+      <li>Foo</li>
+      <li>Bar</li>
+      <li>Qux</li>
+    </ul>
+  </app-layout>
+</body>
+```
+
 ## References
 
 - [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components)
