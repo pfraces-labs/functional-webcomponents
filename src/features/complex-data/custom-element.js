@@ -1,13 +1,13 @@
-const attrsMap = (attributes) => {
+const attrs = (attributes) => {
   return attributes.reduce(
     (acc, attribute) => ({ ...acc, [attribute.name]: attribute.value }),
     {}
   );
 };
 
-const customEventDispatcher = (element) => {
+const bindDispatch = (target) => {
   return (eventName, detail) => {
-    element.dispatchEvent(
+    target.dispatchEvent(
       new CustomEvent(eventName, {
         bubbles: true,
         detail
@@ -22,13 +22,13 @@ export const customElement = (render) => {
       super();
       const shadowRoot = this.attachShadow({ mode: 'open' });
 
-      const children = render({
-        ...attrsMap([...this.attributes]),
+      const shadowRootChildren = render({
+        ...attrs([...this.attributes]),
         ...this.data,
-        dispatch: customEventDispatcher(this)
+        dispatch: bindDispatch(this)
       });
 
-      [].concat(children).forEach((child) => {
+      [].concat(shadowRootChildren).forEach((child) => {
         shadowRoot.appendChild(child);
       });
     }

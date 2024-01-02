@@ -1,8 +1,8 @@
 import { customElement } from './custom-element.js';
 import { h1, p } from './hyperscript.js';
 
-export const SecondsCounter = customElement(({ onMount }) => {
-  onMount(() => {
+export const SecondsCounter = customElement(({ onConnected }) => {
+  onConnected(() => {
     let counter = 0;
 
     const intervalId = setInterval(() => {
@@ -24,8 +24,8 @@ export const SecondsCounter = customElement(({ onMount }) => {
     ),
     p(
       [
-        'The counter is activated when the component mounts, and deactivated',
-        'when unmounts.'
+        'The counter is activated when the component is connected to the DOM,',
+        'and deactivated when it is disconnected.'
       ].join(' ')
     )
   ];

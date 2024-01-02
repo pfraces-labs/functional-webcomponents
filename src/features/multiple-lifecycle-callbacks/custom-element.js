@@ -1,15 +1,15 @@
 const isFunction = (value) => typeof value === 'function';
 
-const attrsMap = (attributes) => {
+const attrs = (attributes) => {
   return attributes.reduce(
     (acc, attribute) => ({ ...acc, [attribute.name]: attribute.value }),
     {}
   );
 };
 
-const customEventDispatcher = (element) => {
+const bindDispatch = (target) => {
   return (eventName, detail) => {
-    element.dispatchEvent(
+    target.dispatchEvent(
       new CustomEvent(eventName, {
         bubbles: true,
         detail
@@ -18,13 +18,13 @@ const customEventDispatcher = (element) => {
   };
 };
 
-const addMountListener = (element) => {
-  return (mountListener) => {
-    element.mountListeners.push(() => {
-      const unmountListener = mountListener();
+const bindOnConnected = (target) => {
+  return (connectedListener) => {
+    target.connectedListeners.push(() => {
+      const disconnectedListener = connectedListener();
 
-      if (isFunction(unmountListener)) {
-        element.unmountListeners.push(unmountListener);
+      if (isFunction(disconnectedListener)) {
+        target.disconnectedListeners.push(disconnectedListener);
       }
     });
   };
@@ -35,34 +35,33 @@ export const customElement = (render) => {
     constructor() {
       super();
       const shadowRoot = this.attachShadow({ mode: 'open' });
-      this.mountListeners = [];
-      this.unmountListeners = [];
+      this.connectedListeners = [];
+      this.disconnectedListeners = [];
 
-      const children = render({
-        ...attrsMap([...this.attributes]),
+      const shadowRootChildren = render({
+        ...attrs([...this.attributes]),
         ...this.data,
-        dispatch: customEventDispatcher(this),
-        onMount: addMountListener(this)
+        dispatch: bindDispatch(this),
+        onConnected: bindOnConnected(this)
       });
 
-      [].concat(children).forEach((child) => {
+      [].concat(shadowRootChildren).forEach((child) => {
         shadowRoot.appendChild(child);
       });
     }
 
     connectedCallback() {
-      this.mountListeners.forEach((listener) => {
-        listener();
+      this.connectedListeners.forEach((connectedListener) => {
+        connectedListener();
       });
     }
 
     disconnectedCallback() {
-      const unmountListeners = this.unmountListeners;
-      this.unmountListeners = [];
-
-      unmountListeners.forEach((listener) => {
-        listener();
+      this.disconnectedListeners.forEach((disconnectedListener) => {
+        disconnectedListener();
       });
+
+      this.disconnectedListeners = [];
     }
   };
 };

@@ -6,13 +6,12 @@ const createTextNode = (content) => document.createTextNode(content);
 
 export const createElement = ({ tagName, props = {}, children = [] }) => {
   const element = document.createElement(tagName);
+  Object.assign(element, props);
 
   element.on = (...args) => {
     element.addEventListener(...args);
     return element;
   };
-
-  Object.assign(element, props);
 
   children.forEach((child) => {
     element.appendChild(isString(child) ? createTextNode(child) : child);

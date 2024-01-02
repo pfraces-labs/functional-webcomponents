@@ -1,4 +1,4 @@
-const attrsMap = (attributes) => {
+const attrs = (attributes) => {
   return attributes.reduce(
     (acc, attribute) => ({ ...acc, [attribute.name]: attribute.value }),
     {}
@@ -10,7 +10,7 @@ export const customElement = (render) => {
     constructor() {
       super();
       const shadowRoot = this.attachShadow({ mode: 'open' });
-      shadowRoot.innerHTML = render(attrsMap([...this.attributes]));
+      shadowRoot.innerHTML = render(attrs([...this.attributes]));
     }
   };
 };

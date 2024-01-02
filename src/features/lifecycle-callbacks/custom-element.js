@@ -1,15 +1,15 @@
 const noop = () => {};
 
-const attrsMap = (attributes) => {
+const attrs = (attributes) => {
   return attributes.reduce(
     (acc, attribute) => ({ ...acc, [attribute.name]: attribute.value }),
     {}
   );
 };
 
-const customEventDispatcher = (element) => {
+const bindDispatch = (target) => {
   return (eventName, detail) => {
-    element.dispatchEvent(
+    target.dispatchEvent(
       new CustomEvent(eventName, {
         bubbles: true,
         detail
@@ -18,10 +18,10 @@ const customEventDispatcher = (element) => {
   };
 };
 
-const mountListener = (element) => {
-  return (onMount) => {
-    element.onMount = () => {
-      element.onUnmount = onMount();
+const bindOnConnected = (target) => {
+  return (connectedListener) => {
+    target.connectedListener = () => {
+      target.disconnectedListener = connectedListener();
     };
   };
 };
@@ -31,27 +31,27 @@ export const customElement = (render) => {
     constructor() {
       super();
       const shadowRoot = this.attachShadow({ mode: 'open' });
-      this.onMount = noop;
-      this.onUnmount = noop;
+      this.connectedListener = noop;
+      this.disconnectedListener = noop;
 
-      const children = render({
-        ...attrsMap([...this.attributes]),
+      const shadowRootChildren = render({
+        ...attrs([...this.attributes]),
         ...this.data,
-        dispatch: customEventDispatcher(this),
-        onMount: mountListener(this)
+        dispatch: bindDispatch(this),
+        onConnected: bindOnConnected(this)
       });
 
-      [].concat(children).forEach((child) => {
+      [].concat(shadowRootChildren).forEach((child) => {
         shadowRoot.appendChild(child);
       });
     }
 
     connectedCallback() {
-      this.onMount();
+      this.connectedListener();
     }
 
     disconnectedCallback() {
-      this.onUnmount();
+      this.disconnectedListener();
     }
   };
 };

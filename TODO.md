@@ -7,7 +7,6 @@
 - [x] Prettier: Markdown with 80-characters print width
 - [x] Prettier: No trailing commas
 - [x] Live reload
-- [x] Standalone examples
 
 ## Getting Started
 
@@ -28,9 +27,10 @@
 - [x] Lifecycle Callbacks
 - [x] Multiple Lifecycle Callbacks
 - [x] Component Composition
-- [ ] CSS Files
 - [ ] Using Components From HyperScript
 - [ ] Fine-grained Reactivity
+- [ ] Importing Styles
+- [ ] Styles Piercing
 
 ## Research
 
@@ -39,5 +39,5 @@
   - <https://stackoverflow.com/questions/63066330/create-webcomponent-through-createelement>
 - [ ] Benefits and drawbacks of using `<template>` clones
 - [ ] Are `document.createElement`-created elements innert?
-- [ ] How to theme Shadow DOM CSS (CSS vars?)
 - [ ] Change detection (`Proxy`, `MutationObserver`, getters/setters, signals)
+- [ ] Inline `<style>` tags vs `adoptedStyleSheets`

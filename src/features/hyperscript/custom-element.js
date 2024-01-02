@@ -1,4 +1,4 @@
-const attrsMap = (attributes) => {
+const attrs = (attributes) => {
   return attributes.reduce(
     (acc, attribute) => ({ ...acc, [attribute.name]: attribute.value }),
     {}
@@ -10,9 +10,9 @@ export const customElement = (render) => {
     constructor() {
       super();
       const shadowRoot = this.attachShadow({ mode: 'open' });
-      const children = render(attrsMap([...this.attributes]));
+      const shadowRootChildren = render(attrs([...this.attributes]));
 
-      [].concat(children).forEach((child) => {
+      [].concat(shadowRootChildren).forEach((child) => {
         shadowRoot.appendChild(child);
       });
     }

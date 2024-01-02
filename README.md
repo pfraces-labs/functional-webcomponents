@@ -199,7 +199,7 @@ We can reflect attribute values by iterating `this.attributes` from the
 [src/features/attributes/custom-element.js](src/features/attributes/custom-element.js)
 
 ```js
-const attrsMap = (attributes) => {
+const attrs = (attributes) => {
   return attributes.reduce(
     (acc, attribute) => ({ ...acc, [attribute.name]: attribute.value }),
     {}
@@ -211,7 +211,7 @@ export const customElement = (render) => {
     constructor() {
       super();
       const shadowRoot = this.attachShadow({ mode: 'open' });
-      shadowRoot.innerHTML = render(attrsMap([...this.attributes]));
+      shadowRoot.innerHTML = render(attrs([...this.attributes]));
     }
   };
 };
@@ -227,14 +227,14 @@ export const GreetMe = customElement(({ name }) => `<h1>Hello, ${name}!</h1>`);
 
 ### HyperScript
 
-Current frontend frameworks using a render function to define component contents
-from JavaScript use one of the following approaches to declare the markup:
+Current frontend frameworks use one of the following approaches to declare the
+markup from JavaScript:
 
 - [JSX](https://react.dev/learn/writing-markup-with-jsx)
 - [Tagged Templates](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates)
 - A [HyperScript](https://github.com/hyperhype/hyperscript)-like syntax
 
-Let's implement our own HyperScript-like syntax.
+Let's implement our own HyperScript engine since it is the simpler approach.
 
 [src/features/hyperscript/hyperscript.js](src/features/hyperscript/hyperscript.js)
 
@@ -254,8 +254,8 @@ export const createElement = ({ tagName, props = {}, children = [] }) => {
 };
 ```
 
-Let's create a `createElement`-wrapper to build a cleaner API for building DOM
-elements.
+Let's write a wrapper on top of `createElement` to use a cleaner API for
+building DOM elements.
 
 [src/features/hyperscript/hyperscript.js](src/features/hyperscript/hyperscript.js)
 
@@ -287,8 +287,8 @@ export const h1 = createElementPartial('h1');
 export const p = createElementPartial('p');
 ```
 
-We can declare as many element creators as we need, then we will use them to
-build the component markup.
+We can define as many element creators as we need to be used from our components
+to declare the markup.
 
 [src/features/hyperscript/greet-me.js](src/features/hyperscript/greet-me.js)
 
@@ -314,9 +314,9 @@ export const customElement = (render) => {
     constructor() {
       super();
       const shadowRoot = this.attachShadow({ mode: 'open' });
-      const children = render(attrsMap([...this.attributes]));
+      const shadowRootChildren = render(attrs([...this.attributes]));
 
-      [].concat(children).forEach((child) => {
+      [].concat(shadowRootChildren).forEach((child) => {
         shadowRoot.appendChild(child);
       });
     }
@@ -339,14 +339,10 @@ the host element.
 
 ```js
 export const createElement = ({ tagName, props = {}, children = [] }) => {
-  const element = document.createElement(tagName);
-
   element.on = (...args) => {
     element.addEventListener(...args);
     return element;
   };
-
-  // ...
 };
 ```
 
@@ -380,15 +376,15 @@ In contrast, with native DOM APIs, we add event listeners via `addEventListener`
 to accomplish the same. This is a more intuitive abstraction if we consider
 component events as its outputs.
 
-We are going to provide a `dispatch` function through the component props which
-will dispatch custom events.
+We are going to provide a `dispatch` function through the component props to
+dispatch custom events.
 
 [src/features/custom-events/custom-element.js](src/features/custom-events/custom-element.js)
 
 ```js
-const customEventDispatcher = (element) => {
+const bindDispatch = (target) => {
   return (eventName, detail) => {
-    element.dispatchEvent(
+    target.dispatchEvent(
       new CustomEvent(eventName, {
         bubbles: true,
         detail
@@ -400,14 +396,10 @@ const customEventDispatcher = (element) => {
 export const customElement = (render) => {
   return class extends HTMLElement {
     constructor() {
-      // ...
-
-      const children = render({
-        ...attrsMap([...this.attributes])
-        dispatch: customEventDispatcher(this),
+      const shadowRootChildren = render({
+        ...attrs([...this.attributes])
+        dispatch: bindDispatch(this),
       });
-
-      // ...
     }
   };
 };
@@ -485,7 +477,6 @@ export const customElement = (render) => {
       super();
       const shadowRoot = this.attachShadow({ mode: 'open' });
       shadowRoot.adoptedStyleSheets = [defaultStyleSheet];
-      // ...
     }
   };
 };
@@ -497,15 +488,11 @@ export const customElement = (render) => {
 <input-number value="0" style="background-color: lightgrey"></input-number>
 ```
 
-At first, having `display: block;` applied to components seems a good default,
-but it has its drawbacks:
+Having `display: block;` applied to components seems a good default, but it
+changes the default behavior defined in the standard
 
-- It adds more computation to the creation of new components which could mean a
-  performance penalty when creating lots of them
-- It changes the default behavior defined in the standard
-
-For those reasons we are going to do without this feature and keep it just in
-the default styles example for reference.
+For now, we are going to do without this feature and keep it just in the default
+styles example for reference.
 
 ## Complex Data
 
@@ -519,10 +506,7 @@ functions.
 
 ```js
 export const createElement = ({ tagName, props = {}, children = [] }) => {
-  const element = document.createElement(tagName);
-  // ...
   Object.assign(element, props);
-  // ...
 };
 ```
 
@@ -534,7 +518,8 @@ attributes when using the component from HTML and properties when using the
 component from another component through HyperScript.
 
 Also, we want to provide only explicitly declared properties, hiding away the
-ones provided by the DOM.
+ones provided by the DOM. For this reason we are going to use a custom `data`
+property to pass complex data to components.
 
 [src/features/complex-data/custom-element.js](src/features/complex-data/custom-element.js)
 
@@ -542,15 +527,11 @@ ones provided by the DOM.
 export const customElement = (render) => {
   return class extends HTMLElement {
     constructor() {
-      // ...
-
-      const children = render({
-        ...attrsMap([...this.attributes]),
+      const shadowRootChildren = render({
+        ...attrs([...this.attributes]),
         ...this.data,
-        dispatch: customEventDispatcher(this)
+        dispatch: bindDispatch(this)
       });
-
-      // ...
     }
   };
 };
@@ -593,8 +574,8 @@ export const OrderedList = customElement(({ items, dispatch }) => [
 </body>
 ```
 
-`OrderList` component can access to the attached `data` property since the
-inline script code is executed before the component `constructor`.
+`OrderList` component can access the attached `data` property since the inline
+script code is executed before the component `constructor`.
 
 ### Lifecycle Callbacks
 
@@ -615,6 +596,9 @@ Custom element lifecycle callbacks:
 - `attributeChangedCallback()`: called when attributes are changed, added,
   removed, or replaced.
 
+  For now, we are going to implement a wrapper for `connectedCallback` and
+  `disconnectedCallback`.
+
 ```js
 class MyCustomElement extends HTMLElement {
   constructor() {
@@ -631,21 +615,21 @@ class MyCustomElement extends HTMLElement {
 }
 ```
 
-We are goint to provide a `onMount` function through the component props which
-will let us use the `connectedCallback` and `disconnectedCallback` lifecycle
-callbacks with a syntax similar to React's `useEffect`:
+We are going to provide a `onConnected` function through the component props
+which will let us use the `connectedCallback` and `disconnectedCallback`
+lifecycle callbacks with a syntax similar to React's `useEffect`:
 
 ```js
-onMount(() => function onUnmount() {});
+onConnected(() => function onDisconnected() {});
 ```
 
 [src/features/lifecycle-callbacks/custom-element.js](src/features/lifecycle-callbacks/custom-element.js)
 
 ```js
-const mountListener = (element) => {
-  return (onMount) => {
-    element.onMount = () => {
-      element.onUnmount = onMount();
+const bindOnConnected = (target) => {
+  return (connectedListener) => {
+    target.connectedListener = () => {
+      target.disconnectedListener = connectedListener();
     };
   };
 };
@@ -653,24 +637,20 @@ const mountListener = (element) => {
 export const customElement = (render) => {
   return class extends HTMLElement {
     constructor() {
-      // ...
-      this.onMount = noop;
-      this.onUnmount = noop;
+      this.connectedListener = noop;
+      this.disconnectedListener = noop;
 
-      const children = render({
-        // ...
-        onMount: mountListener(this)
+      const shadowRootChildren = render({
+        onMount: bindOnConnected(this)
       });
-
-      // ...
     }
 
     connectedCallback() {
-      this.onMount();
+      this.connectedListener();
     }
 
     disconnectedCallback() {
-      this.onUnmount();
+      this.disconnectedListener();
     }
   };
 };
@@ -682,8 +662,8 @@ export const customElement = (render) => {
 import { customElement } from './custom-element.js';
 import { h1, p } from './hyperscript.js';
 
-export const SecondsCounter = customElement(({ onMount }) => {
-  onMount(() => {
+export const SecondsCounter = customElement(({ onConnected }) => {
+  onConnected(() => {
     let counter = 0;
 
     const intervalId = setInterval(() => {
@@ -705,8 +685,8 @@ export const SecondsCounter = customElement(({ onMount }) => {
     ),
     p(
       [
-        'The counter is activated when the component mounts, and deactivated',
-        'when unmounts.'
+        'The counter is activated when the component is connected to the DOM,',
+        'and deactivated when it is disconnected.'
       ].join(' ')
     )
   ];
@@ -744,38 +724,38 @@ export const SecondsCounter = customElement(({ onMount }) => {
 
 ### Multiple LifeCycle Callbacks
 
-With the previous implementation, if we call `onMount` more than once, each call
-will overwrite the previous one. The last `onMount` call is the only one being
-executed.
+With the previous implementation, if we call `onConnected` more than once, each
+call will overwrite the previous one. The last `onConnected` call will be the
+only one being executed.
 
-[src/features/multiple-lifecycle-callbacks/index.html](src/features/multiple-lifecycle-callbacks/index.html)
+[src/features/multiple-lifecycle-callbacks/lifecycle-logger.js](src/features/multiple-lifecycle-callbacks/lifecycle-logger.js)
 
 ```js
 import { customElement } from './custom-element.js';
 import { h1, p } from './hyperscript.js';
 
-export const LifecycleLogger = customElement(({ onMount }) => {
-  onMount(() => {
-    console.log('1st `unMount`: Mounted');
+export const LifecycleLogger = customElement(({ onConnected }) => {
+  onConnected(() => {
+    console.log('1st `onConnected`: Connected');
 
     return () => {
-      console.log('1st `unMount`: Unmounted');
+      console.log('1st `onConnected`: Disconnected');
     };
   });
 
-  onMount(() => {
-    console.log('2nd `unMount`: Mounted');
+  onConnected(() => {
+    console.log('2nd `onConnected`: Connected');
 
     return () => {
-      console.log('2nd `unMount`: Unmounted');
+      console.log('2nd `onConnected`: Disconnected');
     };
   });
 
-  onMount(() => {
-    console.log('3rd `unMount`: Mounted');
+  onConnected(() => {
+    console.log('3rd `onConnected`: Connected');
 
     return () => {
-      console.log('3rd `unMount`: Unmounted');
+      console.log('3rd `onConnected`: Disconnected');
     };
   });
 
@@ -789,8 +769,8 @@ export const LifecycleLogger = customElement(({ onMount }) => {
 Console output after unmounting:
 
 ```text
-3rd `unMount`: Mounted
-3rd `unMount`: Unmounted
+3rd `onConnected`: Connected
+3rd `onConnected`: Disconnected
 ```
 
 What we want is to be able to declare lifecycle callbacks multiple times so we
@@ -799,24 +779,24 @@ can separate concerns.
 Desired output after unmounting:
 
 ```text
-1st `unMount`: Mounted
-2nd `unMount`: Mounted
-3rd `unMount`: Mounted
-1st `unMount`: Unmounted
-2nd `unMount`: Unmounted
-3rd `unMount`: Unmounted
+1st `onConnected`: Connected
+2nd `onConnected`: Connected
+3rd `onConnected`: Connected
+1st `onConnected`: Disconnected
+2nd `onConnected`: Disconnected
+3rd `onConnected`: Disconnected
 ```
 
 [src/features/multiple-lifecycle-callbacks/custom-element.js](src/features/multiple-lifecycle-callbacks/custom-element.js)
 
 ```js
-const addMountListener = (element) => {
-  return (mountListener) => {
-    element.mountListeners.push(() => {
-      const unmountListener = mountListener();
+const bindOnConnected = (target) => {
+  return (connectedListener) => {
+    target.connectedListeners.push(() => {
+      const disconnectedListener = connectedListener();
 
-      if (isFunction(unmountListener)) {
-        element.unmountListeners.push(unmountListener);
+      if (isFunction(disconnectedListener)) {
+        target.disconnectedListeners.push(disconnectedListener);
       }
     });
   };
@@ -825,39 +805,34 @@ const addMountListener = (element) => {
 export const customElement = (render) => {
   return class extends HTMLElement {
     constructor() {
-      // ...
-      this.mountListeners = [];
-      this.unmountListeners = [];
+      this.connectedListeners = [];
+      this.disconnectedListeners = [];
 
-      const children = render({
-        // ...
-        onMount: addMountListener(this)
+      const shadowRootChildren = render({
+        onConnected: bindOnConnected(this)
       });
-
-      // ...
     }
 
     connectedCallback() {
-      this.mountListeners.forEach((listener) => {
-        listener();
+      this.connectedListeners.forEach((connectedListener) => {
+        connectedListener();
       });
     }
 
     disconnectedCallback() {
-      const unmountListeners = this.unmountListeners;
-      this.unmountListeners = [];
-
-      unmountListeners.forEach((listener) => {
-        listener();
+      this.disconnectedListeners.forEach((disconnectedListener) => {
+        disconnectedListener();
       });
+
+      this.disconnectedListeners = [];
     }
   };
 };
 ```
 
-Replacing `unmounListeners` with an empty array at `disconnectedCallback` is
-needed, otherwise subsequent `mountListener` calls would cause undesired
-`unmountListener` duplication.
+Replacing `disconnectedListeners` with an empty array at the end of
+`disconnectedCallback` is needed, otherwise subsequent `connectedListener` calls
+would cause undesired `disconnectedListener` duplication.
 
 ### Component Composition
 
@@ -901,8 +876,8 @@ Let's use slots from the HTML spec to accomplish content projection.
 > An unnamed slot will be filled with all of the custom element's top-level
 > child nodes that do not have the slot attribute. This includes text nodes.
 
-Although not specified in the documentation, slots can be used without the
-template tag.
+Although not specified in the documentation, it seems that slots can already be
+used outside the template element.
 
 Thanks to HTML slots, we don't need to code any specific behavior in our
 `customElement` implementation to accomplish content projection.
@@ -984,5 +959,6 @@ export const LandingPage = customElement(() => [
 ## References
 
 - [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components)
+- [Web components Series' Articles](https://dev.to/joanllenas/series/20725)
 - [Custom Element Best Practices](https://web.dev/articles/custom-elements-best-practices)
 - [Handling data with Web Components](https://itnext.io/handling-data-with-web-components-9e7e4a452e6e)

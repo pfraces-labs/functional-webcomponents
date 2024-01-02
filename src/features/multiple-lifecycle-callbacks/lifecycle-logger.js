@@ -1,28 +1,28 @@
 import { customElement } from './custom-element.js';
 import { h1, p } from './hyperscript.js';
 
-export const LifecycleLogger = customElement(({ onMount }) => {
-  onMount(() => {
-    console.log('1st `unMount`: Mounted');
+export const LifecycleLogger = customElement(({ onConnected }) => {
+  onConnected(() => {
+    console.log('1st `onConnected`: Connected');
 
     return () => {
-      console.log('1st `unMount`: Unmounted');
+      console.log('1st `onConnected`: Disconnected');
     };
   });
 
-  onMount(() => {
-    console.log('2nd `unMount`: Mounted');
+  onConnected(() => {
+    console.log('2nd `onConnected`: Connected');
 
     return () => {
-      console.log('2nd `unMount`: Unmounted');
+      console.log('2nd `onConnected`: Disconnected');
     };
   });
 
-  onMount(() => {
-    console.log('3rd `unMount`: Mounted');
+  onConnected(() => {
+    console.log('3rd `onConnected`: Connected');
 
     return () => {
-      console.log('3rd `unMount`: Unmounted');
+      console.log('3rd `onConnected`: Disconnected');
     };
   });
 
